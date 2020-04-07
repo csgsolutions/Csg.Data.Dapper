@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Csg.Data.Common;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Csg.Data
     /// <summary>
     /// Provides a string type that has additional database string type information.
     /// </summary>
-    public sealed class DbString : Dapper.SqlMapper.ICustomQueryParameter, Csg.Data.IDbTypeProvider
+    public sealed class DbString : global::Dapper.SqlMapper.ICustomQueryParameter, Csg.Data.Common.IDbTypeProvider
     {
         /// <summary>
         /// Default value for IsAnsi.
@@ -25,7 +26,7 @@ namespace Csg.Data
         /// going through Dapper. Default is 4000, any value larger than this
         /// field will not have the default value applied.
         /// </summary>
-        public const int DefaultLength = Dapper.DbString.DefaultLength;
+        public const int DefaultLength = global::Dapper.DbString.DefaultLength;
 
         /// <summary>
         /// Create a new DbString

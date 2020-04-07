@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Csg.Data;
+using Csg.Data.Common;
 using Csg.Data.Sql;
 using Dapper;
 
@@ -20,9 +21,11 @@ namespace Csg.Data
         /// <param name="commandFlags"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static Dapper.CommandDefinition ToDapperCommand(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered, System.Threading.CancellationToken cancellationToken = default)
+        public static CommandDefinition ToDapperCommand(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered, System.Threading.CancellationToken cancellationToken = default)
         {
-            return query.Render().ToDapperCommand(query.Transaction, query.CommandTimeout, commandFlags, cancellationToken);
+            var transaction = query.Features.Get<IDbTransaction>(query);
+
+            return query.Render().ToDapperCommand(transaction, query.Configuration.CommandTimeout, commandFlags, cancellationToken);
         }
 
         /// <summary>
@@ -34,9 +37,9 @@ namespace Csg.Data
         /// <param name="commandFlags"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static Dapper.CommandDefinition ToDapperCommand(this Sql.SqlStatement statement, System.Data.IDbTransaction transaction = null, int? commandTimeout = null, Dapper.CommandFlags commandFlags = Dapper.CommandFlags.Buffered, System.Threading.CancellationToken cancellationToken = default)
+        public static CommandDefinition ToDapperCommand(this Sql.SqlStatement statement, System.Data.IDbTransaction transaction = null, int? commandTimeout = null, CommandFlags commandFlags = CommandFlags.Buffered, System.Threading.CancellationToken cancellationToken = default)
         {
-            var cmd = new Dapper.CommandDefinition(statement.CommandText,
+            var cmd = new CommandDefinition(statement.CommandText,
                 commandType: System.Data.CommandType.Text,
                 parameters: statement.Parameters.ToDynamicParameters(),
                 transaction: transaction,
@@ -53,9 +56,9 @@ namespace Csg.Data
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static Dapper.DynamicParameters ToDynamicParameters(this IEnumerable<DbParameterValue> parameters)
+        public static DynamicParameters ToDynamicParameters(this IEnumerable<DbParameterValue> parameters)
         {
-            var dynpar = new Dapper.DynamicParameters();
+            var dynpar = new DynamicParameters();
 
             foreach (var param in parameters)
             {
@@ -74,7 +77,7 @@ namespace Csg.Data
         /// <returns></returns>
         public static IEnumerable<T> Query<T>(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered)
         {
-           return Dapper.SqlMapper.Query<T>(query.Connection, ToDapperCommand(query, commandFlags));
+           return SqlMapper.Query<T>(query.Features.Get<IDbConnection>(query), ToDapperCommand(query, commandFlags));
         }
 
         /// <summary>
@@ -86,7 +89,7 @@ namespace Csg.Data
         /// <returns></returns>
         public static Task<IEnumerable<T>> QueryAsync<T>(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered, System.Threading.CancellationToken cancellationToken = default)
         {
-            return Dapper.SqlMapper.QueryAsync<T>(query.Connection, ToDapperCommand(query, commandFlags, cancellationToken: cancellationToken));
+            return SqlMapper.QueryAsync<T>(query.Features.Get<IDbConnection>(query), ToDapperCommand(query, commandFlags, cancellationToken: cancellationToken));
         }
 
         /// <summary>
@@ -98,7 +101,7 @@ namespace Csg.Data
         /// <returns></returns>
         public static T QuerySingle<T>(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered)
         {
-            return Dapper.SqlMapper.QuerySingle<T>(query.Connection, ToDapperCommand(query, commandFlags));
+            return SqlMapper.QuerySingle<T>(query.Features.Get<IDbConnection>(query), ToDapperCommand(query, commandFlags));
         }
 
         /// <summary>
@@ -110,7 +113,7 @@ namespace Csg.Data
         /// <returns></returns>
         public static Task<T> QuerySingleAsync<T>(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered, System.Threading.CancellationToken cancellationToken = default)
         {
-            return Dapper.SqlMapper.QuerySingleAsync<T>(query.Connection, ToDapperCommand(query, commandFlags, cancellationToken: cancellationToken));
+            return SqlMapper.QuerySingleAsync<T>(query.Features.Get<IDbConnection>(query), ToDapperCommand(query, commandFlags, cancellationToken: cancellationToken));
         }
 
         /// <summary>
@@ -122,7 +125,7 @@ namespace Csg.Data
         /// <returns></returns>
         public static T QuerySingleOrDefault<T>(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered)
         {
-            return Dapper.SqlMapper.QuerySingleOrDefault<T>(query.Connection, ToDapperCommand(query, commandFlags));
+            return SqlMapper.QuerySingleOrDefault<T>(query.Features.Get<IDbConnection>(query), ToDapperCommand(query, commandFlags));
         }
 
         /// <summary>
@@ -134,7 +137,7 @@ namespace Csg.Data
         /// <returns></returns>
         public static Task<T> QuerySingleOrDefaultAsync<T>(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered, System.Threading.CancellationToken cancellationToken = default)
         {
-            return Dapper.SqlMapper.QuerySingleOrDefaultAsync<T>(query.Connection, ToDapperCommand(query, commandFlags, cancellationToken: cancellationToken));
+            return SqlMapper.QuerySingleOrDefaultAsync<T>(query.Features.Get<IDbConnection>(query), ToDapperCommand(query, commandFlags, cancellationToken: cancellationToken));
         }
 
         /// <summary>
@@ -146,7 +149,7 @@ namespace Csg.Data
         /// <returns></returns>
         public static T QueryFirst<T>(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered)
         {
-            return Dapper.SqlMapper.QueryFirst<T>(query.Connection, ToDapperCommand(query, commandFlags));
+            return SqlMapper.QueryFirst<T>(query.Features.Get<IDbConnection>(query), ToDapperCommand(query, commandFlags));
         }
 
         /// <summary>
@@ -158,7 +161,7 @@ namespace Csg.Data
         /// <returns></returns>
         public static Task<T> QueryFirstAsync<T>(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered, System.Threading.CancellationToken cancellationToken = default)
         {
-            return Dapper.SqlMapper.QueryFirstAsync<T>(query.Connection, ToDapperCommand(query, commandFlags, cancellationToken: cancellationToken));
+            return SqlMapper.QueryFirstAsync<T>(query.Features.Get<IDbConnection>(query), ToDapperCommand(query, commandFlags, cancellationToken: cancellationToken));
         }
 
         /// <summary>
@@ -170,7 +173,7 @@ namespace Csg.Data
         /// <returns></returns>
         public static T QueryFirstOrDefault<T>(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered)
         {
-            return Dapper.SqlMapper.QueryFirstOrDefault<T>(query.Connection, ToDapperCommand(query, commandFlags));
+            return SqlMapper.QueryFirstOrDefault<T>(query.Features.Get<IDbConnection>(query), ToDapperCommand(query, commandFlags));
         }
 
         /// <summary>
@@ -182,7 +185,7 @@ namespace Csg.Data
         /// <returns></returns>
         public static Task<T> QueryFirstOrDefaultAsync<T>(this IDbQueryBuilder query, CommandFlags commandFlags = CommandFlags.Buffered, System.Threading.CancellationToken cancellationToken = default)
         {
-            return Dapper.SqlMapper.QueryFirstOrDefaultAsync<T>(query.Connection, ToDapperCommand(query, commandFlags, cancellationToken: cancellationToken));
+            return SqlMapper.QueryFirstOrDefaultAsync<T>(query.Features.Get<IDbConnection>(query), ToDapperCommand(query, commandFlags, cancellationToken: cancellationToken));
         }
     }
 

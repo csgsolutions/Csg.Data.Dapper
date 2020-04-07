@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dapper;
+using Csg.Data.Common;
 
 namespace Csg.Data
 {
@@ -28,14 +30,14 @@ namespace Csg.Data
             object parameters = null
 )
         {
-            var cmd = new Dapper.CommandDefinition(commandText,
+            var cmd = new CommandDefinition(commandText,
                 commandType: commandType,
                 parameters: parameters,
                 transaction: scope.Transaction,
                 commandTimeout: commandTimeout
             );
 
-            return Dapper.SqlMapper.Query<T>(scope.Connection, cmd);
+            return SqlMapper.Query<T>(scope.Connection, cmd);
         }
 
         /// <summary>
@@ -54,14 +56,14 @@ namespace Csg.Data
             object parameters = null
         )
         {
-            var cmd = new Dapper.CommandDefinition(commandText,
+            var cmd = new CommandDefinition(commandText,
                 commandType: commandType,
                 parameters: parameters,
                 transaction: scope.Transaction,
                 commandTimeout: commandTimeout
             );
 
-            return await Dapper.SqlMapper.QueryAsync<T>(scope.Connection, cmd);
+            return await SqlMapper.QueryAsync<T>(scope.Connection, cmd);
         }
 
         /// <summary>
@@ -80,14 +82,14 @@ namespace Csg.Data
             object parameters = null
 )
         {
-            var cmd = new Dapper.CommandDefinition(commandText,
+            var cmd = new CommandDefinition(commandText,
                 commandType: commandType,
                 parameters: parameters,
                 transaction: scope.Transaction,
                 commandTimeout: commandTimeout
             );
 
-            return Dapper.SqlMapper.Execute(scope.Connection, cmd);
+            return SqlMapper.Execute(scope.Connection, cmd);
         }
     }
 }

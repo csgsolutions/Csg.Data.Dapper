@@ -10,7 +10,7 @@ namespace Csg.Data
     /// <summary>
     /// Represents a date and/or time value and it's associated database data type.
     /// </summary>
-    public sealed class DbDate<TValue> : Dapper.SqlMapper.ICustomQueryParameter, Csg.Data.IDbTypeProvider where TValue: struct
+    public sealed class DbDate<TValue> : global::Dapper.SqlMapper.ICustomQueryParameter, Csg.Data.Common.IDbTypeProvider where TValue: struct
     {
         public static DbDateType DefaultDateType = DbDateType.DateTime;
 
